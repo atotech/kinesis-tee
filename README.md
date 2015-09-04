@@ -59,7 +59,7 @@ routes {
 				var sink = Math.floor(Math.random() * 2) ? 'b' : 'c';
 				return [ sink ];
 			}"""
-		}
+	}
 }
 ```
 
