@@ -53,11 +53,13 @@ Then add configure routings from your source stream to your sink streams like th
 ```
 routes {
 	static: [ "a" ]
-	javascript: """
-		function route(record) {
-			var sink = Math.floor(Math.random() * 2) ? 'b' : 'c';
-			return [ sink ];
-		}"""
+	javascript {
+		inline: """
+			function route(record) {
+				var sink = Math.floor(Math.random() * 2) ? 'b' : 'c';
+				return [ sink ];
+			}"""
+		}
 }
 ```
 
