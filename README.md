@@ -8,65 +8,61 @@
 
 Kinesis Tee is like [Unix tee] [tee], but for Kinesis streams. Use it to:
 
-1. Mirror a Kinesis stream to another Kinesis stream
+1. Transform the format of a Kinesis stream
 2. Filter records from a Kinesis stream based on rules
-3. Fork a Kinesis stream into multiple Kinesis streams based on rules
+3. Write a Kinesis stream to another Kinesis stream
 
-Rules to apply to your Kinesis stream are written in JavaScript.
+Rules to apply to your Kinesis stream (e.g. for filtering) are written in JavaScript.
 
 ## How it works
 
-You configure Kinesis Tee with a [HOCON-format] [hocon] configuration file containing:
+You configure Kinesis Tee with a self-describing Avro configuration file containing:
 
-1. A single **source stream** to read from
-2. One or more **sink streams** to write events to
-3. **JavaScript rules** for each source stream record to determine which sink stream(s) to write to
+1. A single **source stream** to read records from
+2. A single **sink stream** to write records to
+3. An optional **stream transformer** to convert the records to another supported format
+4. An optional **steam filter** to determine whether to write the records to the sink stream
 
-Define the source stream like so:
+Here is an example:
 
-```
-in {
-	stream-name: "my-source-stream"
-	initial-position: "TRIM_HORIZON" # Or LATEST   
-	max-records: 10000
+```json
+{
+  "schema": "iglu:com.snowplowanalytics.kinesis-tee/Config/avro/1-0-0",
+  "data": {
+    "name": "My Kinesis Tee example",
+    "sourceStream": {
+      "name: "my-source-stream",
+      "initialPosition": "TRIM_HORIZON", Or "LATEST"
+      "maxRecords": 10000
+    },
+    "targetStream": {
+      "name": "my-target-stream",
+    },
+    "transformer": "SNOWPLOW_TO_JSON", Or null
+    "filter": {, Or null
+      "javascript": "BASE64 ENCODED STRING"
+    }
+  }
 }
 ```
 
-Define sink streams like this:
+Link to Avro schema: xxxx
 
-```
-out {
-	a {
-		stream-name: "internal-audit-stream"
-	}
-	b {
-		stream-name: "half-of-records-stream"
-	}
-	c {
-		stream-name: "other-half-of-records-stream"
-	}
+### Transformers
+
+The transformer `SNOWPLOW_TO_JSON` converts a Snowplow enriched event to a JSON using the Snowplow Scala Analytics SDK.
+
+### Filters
+
+Here is an example JavaScript filter function, where returning *true* means the record *will* be written to the target stream:
+
+```javascript
+function filter(record) {
+	return (record.customer.status === "VIP");
 }
 ```
 
-Then add configure routings from your source stream to your sink streams like this:
-
-```
-routes {
-	static: [ "a" ]
-	javascript {
-		inline: """
-			function route(record) {
-				var sink = Math.floor(Math.random() * 2) ? 'b' : 'c';
-				return [ sink ];
-			}"""
-	}
-}
-```
-
-This configuration will:
-
-1. Send every Kinesis record in the source stream to sink stream `a`
-2. Send every Kinesis record to either sink stream `b` or `c` (but never both or neither) at random
+This filter will only send a record from the Kinesis source stream to the sink stream if the record is parseable as JSON, contains a `customer` object which contains a `status` field, and that `status` field is set to the value "VIP". All other records will be silently discarded by Kinesis Tee.
 
 ## Roadmap
 
@@ -80,7 +76,7 @@ We have lots planned - pull requests welcome:
 
 ## Copyright and license
 
-Kinesis Tee is copyright 2015 Snowplow Analytics Ltd.
+Kinesis Tee is copyright 2015-2016 Snowplow Analytics Ltd.
 
 Licensed under the [Apache License, Version 2.0] [license] (the "License");
 you may not use this software except in compliance with the License.
