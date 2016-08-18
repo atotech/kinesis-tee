@@ -54,7 +54,7 @@ The transformer `SNOWPLOW_TO_JSON` converts a Snowplow enriched event to a JSON 
 
 ### Filters
 
-Here is an example JavaScript filter function, where returning *true* means the record *will* be written to the target stream:
+Here is an example JavaScript filter function, where returning `true` means the record **will** be written to the target stream:
 
 ```javascript
 function filter(record) {
