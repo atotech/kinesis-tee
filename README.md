@@ -31,7 +31,7 @@ Here is an example:
   "data": {
     "name": "My Kinesis Tee example",
     "sourceStream": {
-      "name: "my-source-stream",
+      "name": "my-source-stream",
       "initialPosition": "TRIM_HORIZON", Or "LATEST"
       "maxRecords": 10000
     },
