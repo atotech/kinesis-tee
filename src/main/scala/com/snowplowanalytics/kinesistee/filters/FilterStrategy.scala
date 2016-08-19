@@ -12,9 +12,7 @@
  */
 package com.snowplowanalytics.kinesistee.filters
 
-import javax.swing.text.AbstractDocument.Content
-import com.snowplowanalytics.kinesistee.models.Stream
-
+import com.snowplowanalytics.kinesistee.models.{ Stream, Content }
 import scalaz.ValidationNel
 
 trait FilterStrategy {
