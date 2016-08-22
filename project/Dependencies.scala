@@ -15,6 +15,8 @@ import sbt._
 
 object Dependencies {
 
+  val snowplowRepo = "Snowplow Analytics" at "http://maven.snplow.com/releases/"
+
   object V {
 
     val jackson = "2.5.2"
@@ -23,6 +25,7 @@ object Dependencies {
     val specs2 = "2.4"
     val scalazSpecs2 = "0.3.0"
     val configHocon = "1.3.0"
+    val analyticsSdk = "0.1.0"
 
   }
 
@@ -38,6 +41,8 @@ object Dependencies {
     val json4s          = "org.json4s" %% "json4s-jackson" % V.json4s
     val json4sExt       = "org.json4s" %% "json4s-ext" % V.json4s
     val configHocon     = "com.typesafe" % "config" % V.configHocon
+
+    val analyticsSdk = "com.snowplowanalytics" %% "snowplow-scala-analytics-sdk" % V.analyticsSdk
 
   }
 

@@ -30,7 +30,6 @@ object KinesisTeeBuild extends Build {
     .settings(buildSettings: _*)
     .settings(
       libraryDependencies ++= Seq(
-
         Libraries.jackson,
         Libraries.json4s,
         Libraries.json4sExt,
@@ -39,7 +38,8 @@ object KinesisTeeBuild extends Build {
         Libraries.scalazSpecs2,
         Libraries.specs2ScalaCheck,
         Libraries.scalaz,
-        Libraries.configHocon
+        Libraries.configHocon,
+        Libraries.analyticsSdk
       )
     )
 

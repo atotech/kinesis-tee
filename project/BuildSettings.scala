@@ -22,7 +22,8 @@ object BuildSettings {
     retrieveManaged := true,
     description := "Kinesis Tee",
     scalaVersion := "2.11.8",
-    scalacOptions ++= Seq("-feature")
+    scalacOptions ++= Seq("-feature"),
+    resolvers ++= Seq(Dependencies.snowplowRepo)
   )
 
   import sbtassembly.Plugin._
