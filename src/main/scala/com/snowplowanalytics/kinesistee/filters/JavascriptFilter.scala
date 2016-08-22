@@ -12,7 +12,10 @@ import scalaz.ValidationNel
 
 class JavascriptFilter(js: String) extends FilterStrategy {
 
-  val engine = new ScriptEngineManager().getEngineByName("nashorn")
+  // beware:
+  // https://github.com/sbt/sbt/issues/1214
+  val engine = new ScriptEngineManager(null).getEngineByName("nashorn")
+  if (engine==null) { throw new IllegalStateException("Nashorn script engine not available") }
   val in: Invocable = engine.asInstanceOf[Invocable]
 
   engine.eval(new StringReader(js))
