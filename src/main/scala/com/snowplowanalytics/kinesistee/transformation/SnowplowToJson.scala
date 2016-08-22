@@ -12,14 +12,19 @@
  */
 
 package com.snowplowanalytics.kinesistee.transformation
-
 import com.snowplowanalytics.kinesistee.models.Content
+import com.snowplowanalytics.snowplow.analytics.scalasdk.json.EventTransformer
 
-import scalaz.ValidationNel
+import scalaz.{Failure, Success, ValidationNel}
+import scalaz.syntax.validation._
 
+class SnowplowToJson extends TransformationStrategy {
 
-trait TransformationStrategy {
-
-  def transform(content: Content): ValidationNel[Throwable, Content]
+  override def transform(content: Content): ValidationNel[Throwable, Content] = {
+    EventTransformer.transform(content.row) match {
+      case Success(s) => Content(s).success
+      case Failure(f) => new IllegalArgumentException(f.toString()).failureNel
+    }
+  }
 
 }
