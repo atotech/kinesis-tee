@@ -22,8 +22,14 @@ object BuildSettings {
     retrieveManaged := true,
     description := "Kinesis Tee",
     scalaVersion := "2.11.8",
-    scalacOptions ++= Seq("-feature"),
-    resolvers ++= Seq(Dependencies.snowplowRepo)
+    scalacOptions ++= Seq("-feature", "-target:jvm-1.8"),
+    resolvers ++= Seq(Dependencies.snowplowRepo),
+
+    initialize := {
+      val _ = initialize.value
+      if (sys.props("java.specification.version") != "1.8")
+        sys.error("Java 8 is required for this project.")
+    }
   )
 
   import sbtassembly.Plugin._
@@ -42,4 +48,6 @@ object BuildSettings {
   )
 
   lazy val buildSettings = basicSettings ++ sbtAssemblySettings
+
+
 }
