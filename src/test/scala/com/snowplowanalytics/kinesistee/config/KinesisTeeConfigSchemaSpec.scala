@@ -4,7 +4,6 @@ import java.io.{ByteArrayInputStream, PrintWriter, StringWriter}
 
 import org.specs2.mutable.Specification
 import com.sksamuel.avro4s.AvroInputStream
-import com.snowplowanalytics.kinesistee.Configuration._
 
 
 class KinesisTeeConfigSchemaSpec extends Specification {

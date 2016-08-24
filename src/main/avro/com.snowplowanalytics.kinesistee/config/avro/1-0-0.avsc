@@ -1,5 +1,5 @@
 {
-   "namespace":"com.snowplowanalytics.kinesistee.Configuration",
+   "namespace":"com.snowplowanalytics.kinesistee.config",
    "name":"Configuration",
    "type":"record",
    "fields":[
