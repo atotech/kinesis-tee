@@ -13,6 +13,7 @@
 
 import sbt.Keys._
 import sbt._
+import sbtavrohugger.SbtAvrohugger._
 
 object BuildSettings {
 
@@ -47,7 +48,9 @@ object BuildSettings {
     }
   )
 
-  lazy val buildSettings = basicSettings ++ sbtAssemblySettings
+  lazy val avroSettings = sbtavrohugger.SbtAvrohugger.avroSettings
+
+  lazy val buildSettings = basicSettings ++ sbtAssemblySettings ++ avroSettings
 
 
 }

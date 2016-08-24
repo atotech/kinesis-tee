@@ -25,17 +25,19 @@ object Dependencies {
     val scalaz7              = "7.0.6"
     val specs2               = "2.3.13"
     val scalazSpecs2         = "0.2"
+    val avro4s = "1.5.4"
   }
 
   object Libraries {
 
-    val scalaz7              = "org.scalaz"                 %% "scalaz-core"              % V.scalaz7
-    val specs2               = "org.specs2"                 %% "specs2"                   % V.specs2         % "test"
-    val scalazSpecs2         = "org.typelevel"              %% "scalaz-specs2"            % V.scalazSpecs2   % "test"
-    val json4s          = "org.json4s" %% "json4s-jackson" % V.json4s
-    val json4sExt       = "org.json4s" %% "json4s-ext" % V.json4s
-    val configHocon     = "com.typesafe" % "config" % V.configHocon
+    val scalaz7 = "org.scalaz" %% "scalaz-core" % V.scalaz7
+    val specs2 = "org.specs2" %% "specs2" % V.specs2 % "test"
+    val scalazSpecs2 = "org.typelevel" %% "scalaz-specs2" % V.scalazSpecs2 % "test"
+    val json4s = "org.json4s" %% "json4s-jackson" % V.json4s
+    val json4sExt = "org.json4s" %% "json4s-ext" % V.json4s
+    val configHocon = "com.typesafe" % "config" % V.configHocon
     val analyticsSdk = "com.snowplowanalytics" %% "snowplow-scala-analytics-sdk" % V.analyticsSdk
+    val avro4s           = "com.sksamuel.avro4s"    %% "avro4s-core"        % V.avro4s
 
   }
 

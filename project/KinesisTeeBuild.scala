@@ -13,6 +13,8 @@
 
 import sbt.Keys._
 import sbt._
+// avroghugger
+import sbtavrohugger.SbtAvrohugger._
 
 object KinesisTeeBuild extends Build {
 
@@ -36,7 +38,8 @@ object KinesisTeeBuild extends Build {
         Libraries.json4s,
         Libraries.json4sExt,
         Libraries.configHocon,
-        Libraries.analyticsSdk
+        Libraries.analyticsSdk,
+        Libraries.avro4s
       )
     )
 
