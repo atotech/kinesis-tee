@@ -13,10 +13,53 @@
 
 package com.snowplowanalytics.kinesistee
 
+import com.snowplowanalytics.kinesistee.filters.FilterStrategy
+import com.snowplowanalytics.kinesistee.models.Content
+import com.snowplowanalytics.kinesistee.transformation.TransformationStrategy
+import com.snowplowanalytics.kinesistee.models.Stream
+import scalaz.{Failure, Success}
+
 object Main {
 
-  def main(args: Array[String]) {
-    println("hello world")
+  def tee(source: Stream,
+          target: StreamWriter,
+          transformationStrategy: Option[TransformationStrategy],
+          filterStrategy: Option[FilterStrategy],
+          content: Seq[Content]): Unit = {
+
+    // transform first
+    // then filter
+    // then push to stream via StreamWriter
+
+    def transform(content:Content) = {
+      transformationStrategy match  {
+        case Some(strategy) => {
+          strategy.transform(content) match {
+            case Success(s) => s
+            case Failure(f) => throw new IllegalStateException(s"Error transforming item '$content'", f.head)
+          }
+        }
+        case None => content
+      }
+    }
+
+    def filter(content:Content) = {
+      filterStrategy match {
+        case Some(strategy) => {
+          strategy.filter(source, content) match {
+            case Success(s) => !s
+            case Failure(f) => throw new IllegalStateException(s"Error filtering item '$content'", f.head)
+          }
+        }
+        case None => true
+      }
+    }
+
+    content
+      .map(transform)
+      .filter(filter)
+      .foreach(target.write)
   }
+
 
 }
