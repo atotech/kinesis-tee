@@ -30,7 +30,7 @@
                },
                {
                   "name":"maxRecords",
-                  "type":"long"
+                  "type":"int"
                }
             ]
          }
@@ -82,6 +82,22 @@
                "NONE"
             ]
          }
+      },
+      {
+         "name":"filter",
+         "type":[
+            "null",
+            {
+               "name":"Filter",
+               "type":"record",
+               "fields":[
+                  {
+                     "name":"javascript",
+                     "type":"string"
+                  }
+               ]
+            }
+         ]
       }
    ]
 }
