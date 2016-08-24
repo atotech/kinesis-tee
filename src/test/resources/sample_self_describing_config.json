@@ -1,0 +1,17 @@
+{
+  "schema": "iglu:com.snowplowanalytics.kinesistee.tbd",
+  "data": {
+    "name": "My Kinesis Tee example",
+    "sourceStream": {
+      "name": "my-source-stream",
+      "initialPosition": "TRIM_HORIZON",
+      "maxRecords": 10000
+    },
+    "targetStream": {
+      "name": "my-target-stream",
+      "targetAccount": null
+    },
+    "transformer": "SNOWPLOW_TO_JSON",
+    "filter": null
+  }
+}
