@@ -19,11 +19,14 @@
                },
                {
                   "name":"initialPosition",
-                  "type":"enum",
-                  "symbols":[
-                     "LATEST",
-                     "TRIM_HORIZON"
-                  ]
+                  "type":{
+                     "name":"InitialPosition",
+                     "type":"enum",
+                     "symbols":[
+                        "LATEST",
+                        "TRIM_HORIZON"
+                     ]
+                  }
                },
                {
                   "name":"maxRecords",
@@ -44,54 +47,39 @@
                },
                {
                   "name":"targetAccount",
-                  "type":{
-                     "name":"targetAccount",
-                     "type":[
-                        null,
-                        "record"
-                     ],
-                     "fields":[
-                        {
-                           "name":"awsAccessKey",
-                           "type":"string"
-                        },
-                        {
-                           "name":"awsSecretAccessKey",
-                           "type":"string"
-                        },
-                        {
-                           "name":"region",
-                           "type":"string"
-                        }
-                     ]
-                  }
+                  "type":[
+                     "null",
+                     {
+                        "name":"TargetAccount",
+                        "type":"record",
+                        "fields":[
+                           {
+                              "name":"awsAccessKey",
+                              "type":"string"
+                           },
+                           {
+                              "name":"awsSecretAccessKey",
+                              "type":"string"
+                           },
+                           {
+                              "name":"region",
+                              "type":"string"
+                           }
+                        ]
+                     }
+                  ]
                }
             ]
          }
       },
       {
          "name":"transformer",
-         "type":[
-            null,
-            "enum"
-         ],
-         "symbols":[
-            "SNOWPLOW_TO_JSON"
-         ]
-      },
-      {
-         "name":"filter",
          "type":{
-            "name":"Filter",
-            "type":[
-               null,
-               "record"
-            ],
-            "fields":[
-               {
-                  "name":"name",
-                  "type":"string"
-               }
+            "name":"Transformer",
+            "type":"enum",
+            "symbols":[
+               "SNOWPLOW_TO_JSON",
+               "NONE"
             ]
          }
       }
