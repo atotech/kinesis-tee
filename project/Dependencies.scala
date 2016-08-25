@@ -18,7 +18,11 @@ object Dependencies {
   val snowplowRepo = "Snowplow Analytics" at "http://maven.snplow.com/releases/"
 
   object V {
-
+    val awsLambdaCore = "1.1.0"
+    val awsLambdaEvents = "1.3.0"
+    val awsSdk = "1.11.7"
+    val awsLambdaSdk = "1.11.7"
+    val awscala = "0.5.+"
     val json4s = "3.2.10"
     val configHocon = "1.3.0"
     val analyticsSdk = "0.1.0"
@@ -29,6 +33,14 @@ object Dependencies {
   }
 
   object Libraries {
+
+    val awsLambda       = "com.amazonaws" % "aws-lambda-java-core" % V.awsLambdaCore
+    val awsLambdaEvents = "com.amazonaws" % "aws-lambda-java-events" % V.awsLambdaEvents
+    val awsLambdaSdk    = "com.amazonaws" % "aws-java-sdk-lambda" % V.awsLambdaSdk
+    val awsDynamoDbSdk  = "com.amazonaws" % "aws-java-sdk-dynamodb" % V.awsSdk
+    val awsSdk          = "com.amazonaws" % "aws-java-sdk" % V.awsSdk % "provided"
+    val awsSdkCore      = "com.amazonaws" % "aws-java-sdk-core" % V.awsSdk % "provided"
+    val awsscala        = "com.github.seratch" %% "awscala" % V.awscala
 
     val scalaz7 = "org.scalaz" %% "scalaz-core" % V.scalaz7
     val specs2 = "org.specs2" %% "specs2" % V.specs2 % "test"
