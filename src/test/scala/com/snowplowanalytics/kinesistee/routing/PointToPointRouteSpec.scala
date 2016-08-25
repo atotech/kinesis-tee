@@ -13,25 +13,29 @@
 
 package com.snowplowanalytics.kinesistee.routing
 
+import com.snowplowanalytics.kinesistee.StreamWriter
 import org.specs2.mutable.Specification
 import com.snowplowanalytics.kinesistee.models.Stream
+import org.specs2.mock.Mockito
 import org.specs2.scalaz.ValidationMatchers
 
 import scalaz.NonEmptyList
 
-class PointToPointRouteSpec extends Specification with ValidationMatchers {
+class PointToPointRouteSpec extends Specification with ValidationMatchers with Mockito {
 
   def buildStream(str:String): Stream = Stream(name = str)
+  def buildTarget(str:String): StreamWriter = mock[StreamWriter]
 
   "point to point routing" should {
 
     "direct traffic from the given origin to the given destination" in {
-      val route = new PointToPointRoute(buildStream("origin"), buildStream("destination"))
-      route.route(buildStream("origin")) must beSuccessful(buildStream("destination"))
+      val target = buildTarget("destination")
+      val route = new PointToPointRoute(buildStream("origin"), target)
+      route.route(buildStream("origin")) must beSuccessful(target)
     }
 
     "reject routing from an unknown origin" in {
-      val route = new PointToPointRoute(buildStream("gwen"), buildStream("destination"))
+      val route = new PointToPointRoute(buildStream("gwen"), buildTarget("destination"))
       route.route(buildStream("origin")) must beFailing(NonEmptyList("Cannot route from origin 'origin', only origin 'gwen' is supported"))
     }
 

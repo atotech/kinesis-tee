@@ -46,14 +46,14 @@ object App {
       case _ => None
     }
 
-    val route = new PointToPointRoute(sourceStream, Stream(conf.targetStream.name)) // come back to me
+    val route = new PointToPointRoute(sourceStream,
+                                      new StreamWriter(Stream(conf.targetStream.name), conf.targetStream.targetAccount)) // come back to me
 
     tee.tee(sourceStream,
-            new StreamWriter(),
+            route,
             transformation,
             filter,
             data)
-
   }
 
   def getConfiguration(context: LambdaContext): Configuration = {

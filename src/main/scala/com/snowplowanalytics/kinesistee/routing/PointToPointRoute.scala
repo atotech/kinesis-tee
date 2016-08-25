@@ -13,13 +13,15 @@
 
 package com.snowplowanalytics.kinesistee.routing
 
+import com.snowplowanalytics.kinesistee.StreamWriter
+
 import scalaz._
 import scalaz.syntax.validation._
 import com.snowplowanalytics.kinesistee.models.Stream
 
-class PointToPointRoute(origin: Stream, destination: Stream) extends RoutingStrategy {
+class PointToPointRoute(origin: Stream, destination: StreamWriter) extends RoutingStrategy {
 
-  override def route(origin: Stream): ValidationNel[String, Stream] = {
+  override def route(origin: Stream): ValidationNel[String, StreamWriter] = {
     if (origin == this.origin) {
       destination.success
     } else {

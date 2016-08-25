@@ -13,11 +13,13 @@
 
 package com.snowplowanalytics.kinesistee.routing
 
+import com.snowplowanalytics.kinesistee.StreamWriter
+
 import scalaz.ValidationNel
 import com.snowplowanalytics.kinesistee.models.Stream
 
 trait RoutingStrategy {
 
-  def route(origin: Stream): ValidationNel[String, Stream]
+  def route(origin: Stream): ValidationNel[String, StreamWriter]
 
 }

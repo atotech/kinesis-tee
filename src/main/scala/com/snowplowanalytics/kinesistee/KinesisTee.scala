@@ -17,12 +17,14 @@ import com.snowplowanalytics.kinesistee.filters.FilterStrategy
 import com.snowplowanalytics.kinesistee.models.Content
 import com.snowplowanalytics.kinesistee.transformation.TransformationStrategy
 import com.snowplowanalytics.kinesistee.models.Stream
+import com.snowplowanalytics.kinesistee.routing.RoutingStrategy
+
 import scalaz.{Failure, Success}
 
 object KinesisTee {
 
   def tee(source: Stream,
-          target: StreamWriter,
+          routingStrategy: RoutingStrategy,
           transformationStrategy: Option[TransformationStrategy],
           filterStrategy: Option[FilterStrategy],
           content: Seq[Content]): Unit = {
@@ -55,10 +57,17 @@ object KinesisTee {
       }
     }
 
+    def route = {
+      routingStrategy.route(source) match {
+        case Success(s) => s
+        case Failure(f) => throw new IllegalStateException(s"Error routing item '$content' with origin '${source.name}': ${f.head}")
+      }
+    }
+
     content
       .map(transform)
       .filter(filter)
-      .foreach(target.write)
+      .foreach(route.write)
   }
 
 
