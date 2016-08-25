@@ -22,7 +22,7 @@ class JavascriptFilter(js: String) extends FilterStrategy {
 
   override def filter(origin: Stream, content: Content): ValidationNel[Throwable, Boolean] = {
     try {
-      val retVal = in.invokeFunction("filter", origin)
+      val retVal = in.invokeFunction("filter", content.row)
       retVal match {
         case bool:java.lang.Boolean => bool.booleanValue().success
         case e => new RuntimeException(s"'$e' returned by your js function cannot be converted to boolean").failureNel

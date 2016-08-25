@@ -14,15 +14,22 @@ class JavascriptFilterSpec extends Specification with ValidationMatchers {
 
    val jsTrue =
      """
-       | function filter(origin) {
+       | function filter(row) {
        |     return true;
        | }
      """.stripMargin
 
     val jsFalse =
       """
-        | function filter(origin) {
+        | function filter(row) {
         |     return false;
+        | }
+      """.stripMargin
+
+    val jsHelloWorldOnly =
+      """
+        | function filter(row) {
+        |      return row != "hello world";
         | }
       """.stripMargin
 
@@ -37,6 +44,16 @@ class JavascriptFilterSpec extends Specification with ValidationMatchers {
       strategy.filter(buildStream, Content("hello world")) must beSuccessful(false)
     }
 
+    "with a function that filters out `hello world`, return true for non hello world" in {
+      val strategy = new JavascriptFilter(jsHelloWorldOnly)
+      strategy.filter(buildStream, Content("banana")) must beSuccessful(true)
+    }
+
+    "with a function that filters out `hello world`, return false if content is `hello world`" in {
+      val strategy = new JavascriptFilter(jsHelloWorldOnly)
+      strategy.filter(buildStream, Content("hello world")) must beSuccessful(false)
+    }
+
   }
 
   "An invalid js filter" should {
@@ -44,7 +61,7 @@ class JavascriptFilterSpec extends Specification with ValidationMatchers {
     "fail if js is not well formed" in {
       val badlyFormedJs =
         """
-          | function filter(origin) {
+          | function filter(row) {
         """.stripMargin // no trailing slash
 
       val expectedError =
