@@ -1,8 +1,9 @@
-package com.snowplowanalytics.kinesistee
+package com.snowplowanalytics.kinesistee.config
 
 import com.amazonaws.regions.Regions
 import org.specs2.mutable.Specification
 import org.specs2.scalaz.ValidationMatchers
+
 import scalaz.NonEmptyList
 
 class LambdaUtilsSpec extends Specification with ValidationMatchers {

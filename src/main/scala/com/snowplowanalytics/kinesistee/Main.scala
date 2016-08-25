@@ -6,18 +6,20 @@ import awscala.dynamodbv2.DynamoDB
 import com.amazonaws.regions.Region
 import com.amazonaws.services.lambda.runtime.{Context => LambdaContext}
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent
-import com.snowplowanalytics.kinesistee.config.{Configuration, ConfigurationBuilder, Transformer}
+import com.snowplowanalytics.kinesistee.config._
 import com.snowplowanalytics.kinesistee.filters.JavascriptFilter
 
 import scala.collection.JavaConversions._
 import scalaz._
-import com.snowplowanalytics.kinesistee.models.{Content,Stream}
+import com.snowplowanalytics.kinesistee.models.{Content, Stream}
 import com.snowplowanalytics.kinesistee.routing.PointToPointRoute
 import com.snowplowanalytics.kinesistee.transformation.SnowplowToJson
 
-object App {
+class Main {
 
-  private val tee = KinesisTee
+  val kinesisTee:Tee = KinesisTee
+  val lambdaUtils:AwsLambdaUtils = LambdaUtils
+  val configurationBuilder:Builder = ConfigurationBuilder
 
   /**
     * AWS Lambda entry point
@@ -30,7 +32,7 @@ object App {
      val conf = getConfiguration(context)
 
      val data = for { rec <- event.getRecords
-                      row = new String(rec.getKinesis.getData.array(), "UTF-8") // unit test all this
+                      row = new String(rec.getKinesis.getData.array(), "UTF-8")
                       content = Content(row)
                 } yield content
 
@@ -47,34 +49,34 @@ object App {
     }
 
     val route = new PointToPointRoute(sourceStream,
-                                      new StreamWriter(Stream(conf.targetStream.name), conf.targetStream.targetAccount)) // come back to me
+                                      new StreamWriter(Stream(conf.targetStream.name), conf.targetStream.targetAccount))
 
-    tee.tee(sourceStream,
-            route,
-            transformation,
-            filter,
-            data)
+    kinesisTee.tee(sourceStream,
+                   route,
+                   transformation,
+                   filter,
+                   data)
   }
 
   def getConfiguration(context: LambdaContext): Configuration = {
-    val region = LambdaUtils.getRegionFromArn(context.getInvokedFunctionArn) match {
+    val region = lambdaUtils.getRegionFromArn(context.getInvokedFunctionArn) match {
       case Success(r) => r
       case Failure(f) => throw new IllegalStateException(f.toString())
     }
 
-    val (confRegion, confTable) = LambdaUtils.getLambdaDescription(context.getFunctionName, region) match {
+    val (confRegion, confTable) = lambdaUtils.getLambdaDescription(context.getFunctionName, region) match {
       case Success(desc) => {
-        LambdaUtils.configLocationFromLambdaDesc(desc) match {
+        lambdaUtils.configLocationFromLambdaDesc(desc) match {
           case Success((region,table)) => (region, table)
           case Failure(f) => throw new IllegalStateException(f.toString())
         }
       }
-      case Failure(f) => throw new IllegalStateException(f.toString())
+      case Failure(f) => throw new IllegalStateException(f.toString(), f.head)
     }
 
-    scala.util.Try(ConfigurationBuilder.build(confTable, context.getFunctionName)(DynamoDB.at(Region.getRegion(confRegion)))) match {
+    scala.util.Try(configurationBuilder.build(confTable, context.getFunctionName)(DynamoDB.at(Region.getRegion(confRegion)))) match {
       case scala.util.Success(c) => c
-      case scala.util.Failure(f) => throw new IllegalStateException("Couldn't build configuration", f) // not much we can do here!
+      case scala.util.Failure(f) => throw new IllegalStateException("Couldn't build configuration", f)
     }
   }
 

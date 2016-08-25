@@ -21,7 +21,7 @@ import com.snowplowanalytics.kinesistee.routing.RoutingStrategy
 
 import scalaz.{Failure, Success}
 
-object KinesisTee {
+object KinesisTee extends Tee {
 
   def tee(source: Stream,
           routingStrategy: RoutingStrategy,

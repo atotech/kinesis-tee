@@ -23,7 +23,7 @@ import scala.collection.JavaConverters._
 import scalaz._
 import scalaz.syntax.validation._
 
-object ConfigurationBuilder {
+object ConfigurationBuilder extends Builder {
 
   /**
     * Fetch a configuration from specified dynamodb instance, using the lambda function name as the key

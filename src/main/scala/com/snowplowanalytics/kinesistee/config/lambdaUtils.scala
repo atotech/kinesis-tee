@@ -1,14 +1,13 @@
-package com.snowplowanalytics.kinesistee
+package com.snowplowanalytics.kinesistee.config
 
-import scalaz.Scalaz._
-import scalaz._
-import com.amazonaws.regions.{Region, Regions}
+import com.amazonaws.regions.Regions
 import com.amazonaws.services.lambda.AWSLambdaClient
 import com.amazonaws.services.lambda.model.GetFunctionConfigurationRequest
+
 import scalaz.Scalaz._
 import scalaz._
 
-object LambdaUtils {
+object LambdaUtils extends AwsLambdaUtils {
 
   val isUri = "^dynamodb:([^/]*)/([^/]*)/?$".r
 
@@ -67,4 +66,10 @@ object LambdaUtils {
     }
   }
 
+}
+
+trait AwsLambdaUtils {
+  def getRegionFromArn(arn: String): ValidationNel[String, String]
+  def getLambdaDescription(lambdaFunction: String, region: String): ValidationNel[Exception, String]
+  def configLocationFromLambdaDesc(description:String): ValidationNel[String, (Regions, String)]
 }
