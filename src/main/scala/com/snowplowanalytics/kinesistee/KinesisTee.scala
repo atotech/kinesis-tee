@@ -19,7 +19,7 @@ import com.snowplowanalytics.kinesistee.transformation.TransformationStrategy
 import com.snowplowanalytics.kinesistee.models.Stream
 import scalaz.{Failure, Success}
 
-object Main {
+object KinesisTee {
 
   def tee(source: Stream,
           target: StreamWriter,

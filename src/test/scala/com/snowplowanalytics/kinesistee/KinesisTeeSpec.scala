@@ -11,14 +11,14 @@ import org.mockito.Matchers.{eq => eqTo}
 import scalaz.syntax.validation._
 import scalaz.ValidationNel
 
-class MainSpec extends Specification with Mockito {
+class KinesisTeeSpec extends Specification with Mockito {
 
   "the tee function" should {
 
     "write everything to the StreamWriter if no filter strategy is in use" in {
       val sampleContent = Seq(Content("a"), Content("a"), Content("a"))
       val mockWriter = mock[StreamWriter]
-      Main.tee(Stream("sample"), mockWriter, None, None, sampleContent)
+      KinesisTee.tee(Stream("sample"), mockWriter, None, None, sampleContent)
       there was three (mockWriter).write(eqTo(Content("a")))
     }
 
@@ -32,7 +32,7 @@ class MainSpec extends Specification with Mockito {
         }
       }
 
-      Main.tee(source = Stream("sample"),
+      KinesisTee.tee(source = Stream("sample"),
                target = mockWriter,
                transformationStrategy = None,
                filterStrategy = Some(new FilterEverything),
@@ -50,7 +50,7 @@ class MainSpec extends Specification with Mockito {
       }
 
       val streamWriter = mock[StreamWriter]
-      Main.tee(Stream("sample"), streamWriter, Some(new MakeEverythingB), None, sampleContent)
+      KinesisTee.tee(Stream("sample"), streamWriter, Some(new MakeEverythingB), None, sampleContent)
 
       there was three (streamWriter).write(eqTo(Content("b")))
     }
@@ -74,7 +74,7 @@ class MainSpec extends Specification with Mockito {
       }
 
       val streamWriter = mock[StreamWriter]
-      Main.tee(Stream("sample"), streamWriter, Some(new MakeEverythingB), Some(new FilterNotB), sampleContent)
+      KinesisTee.tee(Stream("sample"), streamWriter, Some(new MakeEverythingB), Some(new FilterNotB), sampleContent)
 
       there was three (streamWriter).write(eqTo(Content("b")))
     }
@@ -85,7 +85,7 @@ class MainSpec extends Specification with Mockito {
       }
 
       val streamWriter = mock[StreamWriter]
-      Main.tee(Stream("sample"), streamWriter, None, Some(new FailureFilter()), Seq(Content("b"))) must throwA[IllegalStateException]
+      KinesisTee.tee(Stream("sample"), streamWriter, None, Some(new FailureFilter()), Seq(Content("b"))) must throwA[IllegalStateException]
       there was no (streamWriter).write(any[Content])
     }
 
@@ -95,7 +95,7 @@ class MainSpec extends Specification with Mockito {
       }
 
       val streamWriter = mock[StreamWriter]
-      Main.tee(Stream("sample"), streamWriter, Some(new FailureTransform), None, Seq(Content("b"))) must throwA[IllegalStateException]
+      KinesisTee.tee(Stream("sample"), streamWriter, Some(new FailureTransform), None, Seq(Content("b"))) must throwA[IllegalStateException]
       there was no (streamWriter).write(any[Content])
     }
 
