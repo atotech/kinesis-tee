@@ -2,7 +2,6 @@ package com.snowplowanalytics.kinesistee
 
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
-import com.snowplowanalytics.kinesistee.StreamWriter
 import com.snowplowanalytics.kinesistee.filters.FilterStrategy
 import com.snowplowanalytics.kinesistee.models.Content
 import com.snowplowanalytics.kinesistee.models.Stream
@@ -81,12 +80,23 @@ class MainSpec extends Specification with Mockito {
     }
 
     "throw failures in the filter strategy before pushing anything to the stream writer" in {
-      // come back to me
-      ko
+      class FailureFilter extends FilterStrategy {
+        override def filter(origin: Stream, content: Content): ValidationNel[Throwable, Boolean] = new IllegalArgumentException("something").failureNel
+      }
+
+      val streamWriter = mock[StreamWriter]
+      Main.tee(Stream("sample"), streamWriter, None, Some(new FailureFilter()), Seq(Content("b"))) must throwA[IllegalStateException]
+      there was no (streamWriter).write(any[Content])
     }
 
     "throw failures in the transformation strategy before pushing anything to the stream writer" in {
-      ko
+      class FailureTransform extends TransformationStrategy {
+        override def transform(content: Content): ValidationNel[Throwable, Content] = new IllegalStateException("something").failureNel
+      }
+
+      val streamWriter = mock[StreamWriter]
+      Main.tee(Stream("sample"), streamWriter, Some(new FailureTransform), None, Seq(Content("b"))) must throwA[IllegalStateException]
+      there was no (streamWriter).write(any[Content])
     }
 
   }
