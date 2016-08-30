@@ -6,6 +6,7 @@ import awscala.dynamodbv2.DynamoDB
 import com.amazonaws.regions.Region
 import com.amazonaws.services.lambda.runtime.{Context => LambdaContext}
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent
+import com.amazonaws.services.lambda.runtime.events.KinesisEvent.KinesisEventRecord
 import com.snowplowanalytics.kinesistee.config._
 import com.snowplowanalytics.kinesistee.filters.JavascriptFilter
 
@@ -31,7 +32,7 @@ class Main {
 
      val conf = getConfiguration(context)
 
-     val data = for { rec <- event.getRecords
+     val data = for { rec: KinesisEventRecord <- event.getRecords
                       row = new String(rec.getKinesis.getData.array(), "UTF-8")
                       content = Content(row)
                 } yield content
@@ -44,18 +45,20 @@ class Main {
     }
 
     val filter = conf.filter match {
-      case Some(f) => Some(new JavascriptFilter(f.javascript))
+      case Some(f) => Some(new JavascriptFilter(f.javascript)) // TODO base64 me
       case _ => None
     }
 
-    val route = new PointToPointRoute(sourceStream,
-                                      new StreamWriter(Stream(conf.targetStream.name), conf.targetStream.targetAccount))
+    val streamWriter = new StreamWriter(Stream(conf.targetStream.name), conf.targetStream.targetAccount)
+    val route = new PointToPointRoute(sourceStream, streamWriter)
 
     kinesisTee.tee(sourceStream,
                    route,
                    transformation,
                    filter,
                    data)
+
+    streamWriter.flush // finish me
   }
 
   def getConfiguration(context: LambdaContext): Configuration = {

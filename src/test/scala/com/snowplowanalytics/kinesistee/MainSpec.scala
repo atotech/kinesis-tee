@@ -1,19 +1,25 @@
 package com.snowplowanalytics.kinesistee
 
+import java.nio.ByteBuffer
+
 import awscala.dynamodbv2.DynamoDB
 import com.amazonaws.regions.{Region, Regions}
+import com.amazonaws.services.lambda.runtime.events.KinesisEvent
+import com.amazonaws.services.lambda.runtime.events.KinesisEvent.KinesisEventRecord
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import com.snowplowanalytics.kinesistee.config.{TargetStream, Transformer, _}
 import com.amazonaws.services.lambda.runtime.{Context => LambdaContext}
 import com.snowplowanalytics.kinesistee.filters.FilterStrategy
 import com.snowplowanalytics.kinesistee.models.{Content, Stream}
-import com.snowplowanalytics.kinesistee.routing.RoutingStrategy
+import com.snowplowanalytics.kinesistee.routing.{PointToPointRoute, RoutingStrategy}
 import com.snowplowanalytics.kinesistee.transformation.TransformationStrategy
 import org.mockito.Matchers.{eq => eqTo}
 
 import scalaz.ValidationNel
 import scalaz.syntax.validation._
+import scala.collection.JavaConversions._
+import scala.language.reflectiveCalls
 
 class MainSpec extends Specification with Mockito {
 
@@ -49,6 +55,18 @@ class MainSpec extends Specification with Mockito {
     context.getInvokedFunctionArn returns sampleArn
     context.getFunctionName returns sampleFunctionName
     context
+  }
+
+  def sampleKinesisEvent = {
+    val event = mock[KinesisEvent]
+    val record = mock[KinesisEventRecord]
+    val kinesisRecord = mock[KinesisEvent.Record]
+
+    kinesisRecord.getData returns ByteBuffer.wrap("hello world".getBytes("UTF-8"))
+    record.getKinesis returns kinesisRecord
+
+    event.getRecords returns List(record)
+    event
   }
 
   "getting configuration" should {
@@ -121,9 +139,52 @@ class MainSpec extends Specification with Mockito {
   }
 
   "the kinesis tee lambda entry point" should {
-    "be finished" in {
-      ko("finish tests off starting here")
+
+    "tee with the given records" in {
+      val main = new MockMain
+      main.kinesisEventHandler(sampleKinesisEvent, sampleContext)
+      there was one (main.kinesisTee).tee(any[Stream],
+                                          any[RoutingStrategy],
+                                          any[Option[TransformationStrategy]],
+                                          any[Option[FilterStrategy]],
+                                          eqTo(Seq(Content("hello world"))))
+
     }
+
+    "tee using the origin stream in the configuration" in {
+      val main = new MockMain
+      main.kinesisEventHandler(sampleKinesisEvent, sampleContext)
+      there was one (main.kinesisTee).tee(eqTo(Stream(sampleConfig.sourceStream.name)),
+                                          any[RoutingStrategy],
+                                          any[Option[TransformationStrategy]],
+                                          any[Option[FilterStrategy]],
+                                          any[Seq[Content]])
+    }
+
+    "tee using the routing strategy point-to-point" in {
+      val main = new MockMain {
+        override val kinesisTee = new Tee {
+
+          var lastRoutingStrategy: Option[PointToPointRoute] = None
+
+          override def tee(source: Stream,
+                           routingStrategy: RoutingStrategy,
+                           transformationStrategy: Option[TransformationStrategy],
+                           filterStrategy: Option[FilterStrategy],
+                           content: Seq[Content]): Unit = {
+            lastRoutingStrategy = Some(routingStrategy.asInstanceOf[PointToPointRoute])
+          }
+        }
+      }
+      main.kinesisEventHandler(sampleKinesisEvent, sampleContext)
+      val expectedRouter = new PointToPointRoute(Stream(sampleConfig.sourceStream.name),
+                                                 new StreamWriter(Stream(sampleConfig.targetStream.name),
+                                                                  sampleConfig.targetStream.targetAccount))
+
+      val lastRoutingStrategy:PointToPointRoute = main.kinesisTee.lastRoutingStrategy.get
+      lastRoutingStrategy.toString mustEqual expectedRouter.toString
+    }
+
   }
 
 }

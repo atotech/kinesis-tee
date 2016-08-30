@@ -29,4 +29,8 @@ class PointToPointRoute(origin: Stream, destination: StreamWriter) extends Routi
     }
   }
 
+  override def toString:String = {
+    s"Stream to stream route: stream `${origin.name}` -> stream ${destination.toString}"
+  }
+
 }

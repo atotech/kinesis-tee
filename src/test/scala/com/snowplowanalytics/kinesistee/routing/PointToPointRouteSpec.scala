@@ -41,4 +41,14 @@ class PointToPointRouteSpec extends Specification with ValidationMatchers with M
 
   }
 
+  "rendering as a string" should {
+
+    "display the source and destination" in {
+      val dest = new StreamWriter(Stream("destination"), None)
+      val sample = new PointToPointRoute(buildStream("source"), dest)
+      sample.toString mustEqual s"Stream to stream route: stream `source` -> stream ${dest.toString}"
+    }
+
+  }
+
 }
