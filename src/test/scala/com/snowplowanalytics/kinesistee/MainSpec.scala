@@ -16,10 +16,11 @@ import com.snowplowanalytics.kinesistee.routing.{PointToPointRoute, RoutingStrat
 import com.snowplowanalytics.kinesistee.transformation.TransformationStrategy
 import org.mockito.Matchers.{eq => eqTo}
 
-import scalaz.ValidationNel
+import scalaz.{Success, ValidationNel}
 import scalaz.syntax.validation._
 import scala.collection.JavaConversions._
 import scala.language.reflectiveCalls
+import java.nio.charset.StandardCharsets
 
 class MainSpec extends Specification with Mockito {
 
@@ -183,6 +184,48 @@ class MainSpec extends Specification with Mockito {
 
       val lastRoutingStrategy:PointToPointRoute = main.kinesisTee.lastRoutingStrategy.get
       lastRoutingStrategy.toString mustEqual expectedRouter.toString
+    }
+
+    "tee using the filter strategy defined in the configuration (base64 encoded js)" in {
+
+      val sampleFilterJs =
+        """
+          | function filter(data) {
+          |   if (data=="good") { return true; }
+          |   else { return false; }
+          | }
+        """.stripMargin
+
+      val base64Js = java.util.Base64.getEncoder.encodeToString(sampleFilterJs.getBytes(StandardCharsets.UTF_8))
+
+      val main = new MockMain {
+        override val configurationBuilder:Builder = {
+          val builder = mock[Builder]
+          builder.build(any[String], any[String])(any[DynamoDB]) returns sampleConfig.copy( filter = Some(new Filter(javascript = base64Js)) )
+          builder
+        }
+        override val kinesisTee = new Tee {
+          var lastFilterStrategy:Option[FilterStrategy] = None
+
+          override def tee(source: Stream,
+                           routingStrategy: RoutingStrategy,
+                           transformationStrategy: Option[TransformationStrategy],
+                           filterStrategy: Option[FilterStrategy],
+                           content: Seq[Content]): Unit = {
+            lastFilterStrategy = filterStrategy
+          }
+        }
+      }
+
+      main.kinesisEventHandler(sampleKinesisEvent, sampleContext)
+      val lastFilter = main.kinesisTee.lastFilterStrategy.get
+      val passing = lastFilter.filter(Stream(sampleConfig.sourceStream.name), Content("good"))
+      val failing = lastFilter.filter(Stream(sampleConfig.sourceStream.name), Content("something else"))
+
+      (passing, failing) match {
+        case (Success(p), Success(f)) =>  (p, f) mustEqual (true, false)
+        case _ => ko("The test filter failed to execute, this is unexpected")
+      }
     }
 
   }

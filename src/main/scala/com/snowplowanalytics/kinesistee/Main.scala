@@ -45,7 +45,7 @@ class Main {
     }
 
     val filter = conf.filter match {
-      case Some(f) => Some(new JavascriptFilter(f.javascript)) // TODO base64 me
+      case Some(f) => Some(new JavascriptFilter(new String(java.util.Base64.getDecoder.decode(f.javascript), "UTF-8")))
       case _ => None
     }
 
