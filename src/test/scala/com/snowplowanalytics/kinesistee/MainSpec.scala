@@ -13,7 +13,7 @@ import com.amazonaws.services.lambda.runtime.{Context => LambdaContext}
 import com.snowplowanalytics.kinesistee.filters.FilterStrategy
 import com.snowplowanalytics.kinesistee.models.{Content, Stream}
 import com.snowplowanalytics.kinesistee.routing.{PointToPointRoute, RoutingStrategy}
-import com.snowplowanalytics.kinesistee.transformation.TransformationStrategy
+import com.snowplowanalytics.kinesistee.transformation.{SnowplowToJson, TransformationStrategy}
 import org.mockito.Matchers.{eq => eqTo}
 
 import scalaz.{Success, ValidationNel}
@@ -228,6 +228,21 @@ class MainSpec extends Specification with Mockito {
       }
     }
 
+    "tee with a transformer given in the configuration (set to None)" in {
+      val main = new MockMain {
+        override val configurationBuilder:Builder = {
+          val builder = mock[Builder]
+          builder.build(any[String], any[String])(any[DynamoDB]) returns sampleConfig.copy(transformer = Transformer.NONE)
+          builder
+        }
+      }
+      main.kinesisEventHandler(sampleKinesisEvent, sampleContext)
+      there was one (main.kinesisTee).tee(any[Stream],
+                                          any[RoutingStrategy],
+                                          eqTo(None),
+                                          any[Option[FilterStrategy]],
+                                          any[Seq[Content]])
+    }
   }
 
 }
