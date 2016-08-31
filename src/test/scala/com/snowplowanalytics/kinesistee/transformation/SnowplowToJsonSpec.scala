@@ -251,13 +251,13 @@ class SnowplowToJsonSpec extends Specification with ValidationMatchers {
   "converting a Snowplow enriched event to JSON" should {
 
     "convert a valid snowplow event to JSON" in {
-      new SnowplowToJson().transform(Content(eventValues)) must beSuccessful
+      new SnowplowToJson().transform(Content(eventValues, "p")) must beSuccessful
     }
 
     "give the snowplow analytics sdk error message on failure" in {
       val expectedMsg = """NonEmptyList(java.lang.IllegalArgumentException: Expected 131 fields, received 1 fields. This may be caused by attempting to use this SDK version on an older or newer version of Snowplow enriched events.)"""
 
-      new SnowplowToJson().transform(Content("")) match {
+      new SnowplowToJson().transform(Content("", "p")) match {
         case Success(s) => ko("have failed, it should")
         case Failure(f) => f.toString mustEqual expectedMsg
       }

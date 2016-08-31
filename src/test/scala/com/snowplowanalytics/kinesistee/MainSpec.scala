@@ -22,6 +22,8 @@ import scala.collection.JavaConversions._
 import scala.language.reflectiveCalls
 import java.nio.charset.StandardCharsets
 
+import com.amazonaws.services.kinesis.producer.KinesisProducer
+
 class MainSpec extends Specification with Mockito {
 
   val sampleConfig = Configuration(name = "My Kinesis Tee example",
@@ -46,6 +48,8 @@ class MainSpec extends Specification with Mockito {
       builder.build(any[String], any[String])(any[DynamoDB]) returns sampleConfig
       builder
     }
+
+    override val getKinesisProducer = (_:Option[TargetAccount]) => mock[KinesisProducer]
   }
 
   val sampleArn = "arn:aws:elasticbeanstalk:us-east-1:123456789012:environment/My App/MyEnvironment"
@@ -63,6 +67,7 @@ class MainSpec extends Specification with Mockito {
     val record = mock[KinesisEventRecord]
     val kinesisRecord = mock[KinesisEvent.Record]
 
+    kinesisRecord.getPartitionKey returns "p"
     kinesisRecord.getData returns ByteBuffer.wrap("hello world".getBytes("UTF-8"))
     record.getKinesis returns kinesisRecord
 
@@ -148,7 +153,7 @@ class MainSpec extends Specification with Mockito {
                                           any[RoutingStrategy],
                                           any[Option[TransformationStrategy]],
                                           any[Option[FilterStrategy]],
-                                          eqTo(Seq(Content("hello world"))))
+                                          eqTo(Seq(Content("hello world", "p"))))
 
     }
 
@@ -180,7 +185,8 @@ class MainSpec extends Specification with Mockito {
       main.kinesisEventHandler(sampleKinesisEvent, sampleContext)
       val expectedRouter = new PointToPointRoute(Stream(sampleConfig.sourceStream.name),
                                                  new StreamWriter(Stream(sampleConfig.targetStream.name),
-                                                                  sampleConfig.targetStream.targetAccount))
+                                                                  sampleConfig.targetStream.targetAccount,
+                                                                  mock[KinesisProducer]))
 
       val lastRoutingStrategy:PointToPointRoute = main.kinesisTee.lastRoutingStrategy.get
       lastRoutingStrategy.toString mustEqual expectedRouter.toString
@@ -219,8 +225,8 @@ class MainSpec extends Specification with Mockito {
 
       main.kinesisEventHandler(sampleKinesisEvent, sampleContext)
       val lastFilter = main.kinesisTee.lastFilterStrategy.get
-      val passing = lastFilter.filter(Stream(sampleConfig.sourceStream.name), Content("good"))
-      val failing = lastFilter.filter(Stream(sampleConfig.sourceStream.name), Content("something else"))
+      val passing = lastFilter.filter(Stream(sampleConfig.sourceStream.name), Content("good", "p"))
+      val failing = lastFilter.filter(Stream(sampleConfig.sourceStream.name), Content("something else", "p"))
 
       (passing, failing) match {
         case (Success(p), Success(f)) =>  (p, f) mustEqual (true, false)

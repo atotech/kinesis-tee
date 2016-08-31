@@ -37,7 +37,7 @@ object KinesisTeeBuild extends Build {
         Libraries.scalazSpecs2,
         Libraries.json4s,
         Libraries.json4sExt,
-        Libraries.configHocon,
+        Libraries.kinesisProducerLib,
         Libraries.analyticsSdk,
         Libraries.avro4s,
         Libraries.awsSdkCore,
@@ -45,7 +45,8 @@ object KinesisTeeBuild extends Build {
         Libraries.awsLambdaSdk,
         Libraries.awsLambda,
         Libraries.awsLambdaEvents,
-        Libraries.awsscala
+        Libraries.awsscala,
+        Libraries.slf4jSimple
       )
     )
 

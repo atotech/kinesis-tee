@@ -18,38 +18,40 @@ object Dependencies {
   val snowplowRepo = "Snowplow Analytics" at "http://maven.snplow.com/releases/"
 
   object V {
-    val awsLambdaCore = "1.1.0"
-    val awsLambdaEvents = "1.3.0"
-    val awsSdk = "1.11.7"
-    val awsLambdaSdk = "1.11.7"
-    val awscala = "0.5.+"
-    val json4s = "3.2.10"
-    val configHocon = "1.3.0"
-    val analyticsSdk = "0.1.0"
-    val scalaz7              = "7.0.6"
-    val specs2               = "2.3.13"
-    val scalazSpecs2         = "0.2"
-    val avro4s = "1.5.4"
+    val awsLambdaCore             = "1.1.0"
+    val awsLambdaEvents           = "1.3.0"
+    val awsSdk                    = "1.11.7"
+    val awsLambdaSdk              = "1.11.7"
+    val awscala                   = "0.5.+"
+    val json4s                    = "3.2.10"
+    val analyticsSdk              = "0.1.0"
+    val scalaz7                   = "7.0.6"
+    val specs2                    = "2.3.13"
+    val scalazSpecs2              = "0.2"
+    val avro4s                    = "1.5.4"
+    val kinesisProducerLibrary    = "0.10.2"
+    val slf4jSimple               = "1.7.+"
   }
 
   object Libraries {
 
-    val awsLambda       = "com.amazonaws" % "aws-lambda-java-core" % V.awsLambdaCore
-    val awsLambdaEvents = "com.amazonaws" % "aws-lambda-java-events" % V.awsLambdaEvents
-    val awsLambdaSdk    = "com.amazonaws" % "aws-java-sdk-lambda" % V.awsLambdaSdk
-    val awsDynamoDbSdk  = "com.amazonaws" % "aws-java-sdk-dynamodb" % V.awsSdk
-    val awsSdk          = "com.amazonaws" % "aws-java-sdk" % V.awsSdk % "provided"
-    val awsSdkCore      = "com.amazonaws" % "aws-java-sdk-core" % V.awsSdk % "provided"
-    val awsscala        = "com.github.seratch" %% "awscala" % V.awscala
+    val awsLambda          = "com.amazonaws" % "aws-lambda-java-core"                  % V.awsLambdaCore
+    val awsLambdaEvents    = "com.amazonaws" % "aws-lambda-java-events"                % V.awsLambdaEvents
+    val awsLambdaSdk       = "com.amazonaws" % "aws-java-sdk-lambda"                   % V.awsLambdaSdk
+    val awsDynamoDbSdk     = "com.amazonaws" % "aws-java-sdk-dynamodb"                 % V.awsSdk
+    val awsSdk             = "com.amazonaws" % "aws-java-sdk"                          % V.awsSdk % "provided"
+    val awsSdkCore         = "com.amazonaws" % "aws-java-sdk-core"                     % V.awsSdk % "provided"
+    val kinesisProducerLib = "com.amazonaws" % "amazon-kinesis-producer"               % V.kinesisProducerLibrary
+    val awsscala           = "com.github.seratch" %% "awscala"                         % V.awscala
+    val slf4jSimple        = "org.slf4j"     % "slf4j-simple"                          % V.slf4jSimple
 
-    val scalaz7 = "org.scalaz" %% "scalaz-core" % V.scalaz7
-    val specs2 = "org.specs2" %% "specs2" % V.specs2 % "test"
-    val scalazSpecs2 = "org.typelevel" %% "scalaz-specs2" % V.scalazSpecs2 % "test"
-    val json4s = "org.json4s" %% "json4s-jackson" % V.json4s
-    val json4sExt = "org.json4s" %% "json4s-ext" % V.json4s
-    val configHocon = "com.typesafe" % "config" % V.configHocon
-    val analyticsSdk = "com.snowplowanalytics" %% "snowplow-scala-analytics-sdk" % V.analyticsSdk
-    val avro4s           = "com.sksamuel.avro4s"    %% "avro4s-core"        % V.avro4s
+    val scalaz7            = "org.scalaz" %% "scalaz-core"                             % V.scalaz7
+    val specs2             = "org.specs2" %% "specs2"                                  % V.specs2 % "test"
+    val scalazSpecs2       = "org.typelevel" %% "scalaz-specs2"                        % V.scalazSpecs2 % "test"
+    val json4s             = "org.json4s" %% "json4s-jackson"                          % V.json4s
+    val json4sExt          = "org.json4s" %% "json4s-ext"                              % V.json4s
+    val analyticsSdk       = "com.snowplowanalytics" %% "snowplow-scala-analytics-sdk" % V.analyticsSdk
+    val avro4s             = "com.sksamuel.avro4s" %% "avro4s-core"                    % V.avro4s
 
   }
 

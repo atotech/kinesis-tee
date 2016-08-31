@@ -4,6 +4,7 @@ import java.lang.String
 
 import awscala.dynamodbv2.DynamoDB
 import com.amazonaws.regions.Region
+import com.amazonaws.services.kinesis.producer.KinesisProducer
 import com.amazonaws.services.lambda.runtime.{Context => LambdaContext}
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent.KinesisEventRecord
@@ -21,7 +22,7 @@ class Main {
   val kinesisTee:Tee = KinesisTee
   val lambdaUtils:AwsLambdaUtils = LambdaUtils
   val configurationBuilder:Builder = ConfigurationBuilder
-
+  val getKinesisProducer: (Option[TargetAccount]) => KinesisProducer = StreamWriter.buildProducer
   /**
     * AWS Lambda entry point
     *
@@ -31,12 +32,11 @@ class Main {
   def kinesisEventHandler(event: KinesisEvent, context: LambdaContext): Unit = {
 
      val conf = getConfiguration(context)
-
      val data = for { rec: KinesisEventRecord <- event.getRecords
                       row = new String(rec.getKinesis.getData.array(), "UTF-8")
-                      content = Content(row)
+                      partitionKey = rec.getKinesis.getPartitionKey
+                      content = Content(row, partitionKey)
                 } yield content
-
     val sourceStream = Stream(conf.sourceStream.name)
 
     val transformation = conf.transformer match {
@@ -49,7 +49,8 @@ class Main {
       case _ => None
     }
 
-    val streamWriter = new StreamWriter(Stream(conf.targetStream.name), conf.targetStream.targetAccount)
+    val targetAccount = conf.targetStream.targetAccount
+    val streamWriter = new StreamWriter(Stream(conf.targetStream.name), targetAccount, getKinesisProducer(targetAccount))
     val route = new PointToPointRoute(sourceStream, streamWriter)
 
     kinesisTee.tee(sourceStream,
@@ -58,7 +59,8 @@ class Main {
                    filter,
                    data)
 
-    streamWriter.flush // finish me
+    streamWriter.flush
+    streamWriter.close
   }
 
   def getConfiguration(context: LambdaContext): Configuration = {

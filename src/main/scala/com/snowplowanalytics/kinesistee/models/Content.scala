@@ -12,4 +12,4 @@
  */
 package com.snowplowanalytics.kinesistee.models
 
-case class Content(row: String)
+case class Content(row: String, partitionKey: String)

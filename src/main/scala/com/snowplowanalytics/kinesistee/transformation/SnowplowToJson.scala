@@ -22,7 +22,7 @@ class SnowplowToJson extends TransformationStrategy {
 
   override def transform(content: Content): ValidationNel[Throwable, Content] = {
     EventTransformer.transform(content.row) match {
-      case Success(s) => Content(s).success
+      case Success(s) => Content(s, content.partitionKey).success
       case Failure(f) => new IllegalArgumentException(f.head.toString).failureNel
     }
   }
