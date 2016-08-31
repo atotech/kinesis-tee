@@ -38,8 +38,10 @@ Here is an example:
     "targetStream": {
       "name": "my-target-stream",
     },
-    "transformer": "SNOWPLOW_TO_JSON", Or null
-    "filter": {, Or null
+    "transformer": { // Or null
+      "builtIn": "SNOWPLOW_TO_JSON"
+    },
+    "filter": { // Or null
       "javascript": "BASE64 ENCODED STRING"
     }
   }
