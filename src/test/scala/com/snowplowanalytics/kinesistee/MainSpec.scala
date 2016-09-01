@@ -22,7 +22,7 @@ import scala.collection.JavaConversions._
 import scala.language.reflectiveCalls
 import java.nio.charset.StandardCharsets
 
-import com.amazonaws.services.kinesis.producer.KinesisProducer
+import com.amazonaws.services.kinesis.AmazonKinesisClient
 
 class MainSpec extends Specification with Mockito {
 
@@ -49,7 +49,7 @@ class MainSpec extends Specification with Mockito {
       builder
     }
 
-    override val getKinesisProducer = (_:Option[TargetAccount]) => mock[KinesisProducer]
+    override val getKinesisConnector = (_:Option[TargetAccount]) => mock[AmazonKinesisClient]
   }
 
   val sampleArn = "arn:aws:elasticbeanstalk:us-east-1:123456789012:environment/My App/MyEnvironment"
@@ -186,7 +186,7 @@ class MainSpec extends Specification with Mockito {
       val expectedRouter = new PointToPointRoute(Stream(sampleConfig.sourceStream.name),
                                                  new StreamWriter(Stream(sampleConfig.targetStream.name),
                                                                   sampleConfig.targetStream.targetAccount,
-                                                                  mock[KinesisProducer]))
+                                                                  mock[AmazonKinesisClient]))
 
       val lastRoutingStrategy:PointToPointRoute = main.kinesisTee.lastRoutingStrategy.get
       lastRoutingStrategy.toString mustEqual expectedRouter.toString

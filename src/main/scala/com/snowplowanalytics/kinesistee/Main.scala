@@ -4,7 +4,7 @@ import java.lang.String
 
 import awscala.dynamodbv2.DynamoDB
 import com.amazonaws.regions.Region
-import com.amazonaws.services.kinesis.producer.KinesisProducer
+import com.amazonaws.services.kinesis.AmazonKinesisClient
 import com.amazonaws.services.lambda.runtime.{Context => LambdaContext}
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent.KinesisEventRecord
@@ -22,7 +22,8 @@ class Main {
   val kinesisTee:Tee = KinesisTee
   val lambdaUtils:AwsLambdaUtils = LambdaUtils
   val configurationBuilder:Builder = ConfigurationBuilder
-  val getKinesisProducer: (Option[TargetAccount]) => KinesisProducer = StreamWriter.buildProducer
+  val getKinesisConnector: (Option[TargetAccount]) => AmazonKinesisClient = StreamWriter.buildClient
+
   /**
     * AWS Lambda entry point
     *
@@ -50,7 +51,7 @@ class Main {
     }
 
     val targetAccount = conf.targetStream.targetAccount
-    val streamWriter = new StreamWriter(Stream(conf.targetStream.name), targetAccount, getKinesisProducer(targetAccount))
+    val streamWriter = new StreamWriter(Stream(conf.targetStream.name), targetAccount, getKinesisConnector(targetAccount))
     val route = new PointToPointRoute(sourceStream, streamWriter)
 
     kinesisTee.tee(sourceStream,
@@ -84,7 +85,5 @@ class Main {
       case scala.util.Failure(f) => throw new IllegalStateException("Couldn't build configuration", f)
     }
   }
-
-
 
 }
